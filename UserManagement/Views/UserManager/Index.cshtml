@@ -1,0 +1,44 @@
+﻿@model IEnumerable<UserManagement.UserManager.AuthModels.ApplicationUser>
+
+@{
+    ViewBag.Title = "All Users";
+}
+
+<h1>All Users</h1>
+
+ <a asp-action="Register" asp-controller="Account"
+       class="btn btn-primary mb-3" style="width:auto">
+        Add new user
+    </a>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Full Name</th>
+            <th>Email</th>
+            <th scope="col">Acction</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @foreach (var user in @Model)
+            {
+                <th scope="row">1</th>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="UserManager" asp-action="UserRole" asp-route-userId="@user.Id">Roles</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Separated link</a></li>
+                        </ul>
+                    </div>
+                </td>
+            }
+        </tr>
+    </tbody>
+</table>
