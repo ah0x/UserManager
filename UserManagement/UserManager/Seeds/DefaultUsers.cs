@@ -35,7 +35,7 @@ namespace UserManagement.UserManager.Seeds
         private async static Task SeedClaimsForSuperAdmin(this RoleManager<IdentityRole> roleManager)
         {
             var superAdminRole = await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString());
-            await roleManager.AddPermissionClaim(superAdminRole, "Product");
+            await roleManager.AddPermissionClaim(superAdminRole, "Products");
             await roleManager.AddPermissionClaim(superAdminRole, "Dashboard");
         }
 
