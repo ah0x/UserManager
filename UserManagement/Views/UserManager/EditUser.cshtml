@@ -1,0 +1,65 @@
+﻿@model UserManagement.UserManager.AuthModels.ApplicationUser
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<br /><br /><br />
+<div class="container">
+    <form id="profile-form" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-6">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating">
+                    <input asp-for="@Model.FirstName" class="form-control" required/>
+                    <label style="color:black" asp-for="@Model.FirstName"></label>
+                    <span asp-validation-for="@Model.FirstName" class="text-danger"></span>
+                </div>
+                <br />
+                 <div class="form-floating">
+                    <input asp-for="@Model.LastName" class="form-control" required/>
+                    <label style="color:black" asp-for="@Model.LastName"></label>
+                    <span asp-validation-for="@Model.LastName" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-floating">
+                    <input asp-for="@Model.PhoneNumber" class="form-control" />
+                    <label style="color:black" asp-for="@Model.PhoneNumber" class="form-label"></label>
+                    <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <label>Category Image</label>
+                    <input 
+                        id="txtFile" 
+                        type="file" 
+                        name="file" 
+                        value="Upload Image" 
+                        accept=".png,.jpg,.jpeg,.gif,.tif" 
+                        class="form-control"/>
+                </div>
+                <br />
+                <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            </div>
+            <div class="col-6">
+                <div>
+                    <img id="imgViewer" style="border:1px solid #000000; width:320px; height:320px; margin-left:175px;" src="@Model.ProfilePicture"/>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br /><br /><br /><br />
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+        $(document).ready(function () {
+        });
+        $("#txtFile").change(function (event) {
+            var files = event.target.files;
+            $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+        });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

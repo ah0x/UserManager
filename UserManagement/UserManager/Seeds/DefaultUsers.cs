@@ -11,7 +11,8 @@ namespace UserManagement.UserManager.Seeds
 
         private static ApplicationUser SuperAdminUser = new ApplicationUser()
         {
-            FullName = "Admin",
+            FirstName = "Admin",
+            LastName = "Admin",
             UserName = "Admin@Tm.Iq",
             Email = "Admin@Tm.Iq",
             EmailConfirmed = true,
@@ -37,6 +38,8 @@ namespace UserManagement.UserManager.Seeds
             var superAdminRole = await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString());
             await roleManager.AddPermissionClaim(superAdminRole, "Products");
             await roleManager.AddPermissionClaim(superAdminRole, "Dashboard");
+            await roleManager.AddPermissionClaim(superAdminRole, "RolesPolicy");
+            await roleManager.AddPermissionClaim(superAdminRole, "UserPolicy");
         }
 
         private async static Task AddPermissionClaim(this RoleManager<IdentityRole> roleManager, IdentityRole role, string module)

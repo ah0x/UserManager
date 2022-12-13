@@ -1,0 +1,37 @@
+﻿@model Microsoft.AspNetCore.Identity.IdentityRole
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br /><br />
+<div class="container">
+    <div class="row">
+    <div class="col-md-4">
+        @if (TempData["Message"] != null)
+        {
+            <h3 style="color:red">@TempData["Message"]</h3>
+        }
+        else
+        {
+            <br /><br />
+        }
+        <form asp-action="EditRole" method="post">
+            <h2>Edit Role</h2>
+            <hr />
+            <br />
+            <input type="hidden" name="roleId" value="@Model.Id"/>
+            <div class="form-floating">
+                <input asp-for="Name" class="form-control" autocomplete="firstname" aria-required="true" required/>
+                <label style="color:black" asp-for="Name"></label>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <br />
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Update</button>
+        </form>
+    </div>
+</div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Helper;
 using UserManagement.Interfaces;
 using UserManagement.UserManager.AuthModels;
 using UserManagement.UserManager.Statics;
+using static UserManagement.UserManager.Statics.Permissions;
 
 namespace UserManagement.Controllers
 {
+    [Authorize]
     public class UserManagerController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -28,12 +32,14 @@ namespace UserManagement.Controllers
             return View(await _userManagerService.GetAllUsers());
         }
 
+        [Authorize(Policy = RolesPolicy.Create)]
         [HttpGet]
         public async Task<ActionResult> UserRole(string userId)
         {
             return View(await _userManagerService.GetUserRoleByUserId(userId));
         }
 
+        [Authorize(Policy = RolesPolicy.Create)]
         [HttpPost]
         public async Task<IActionResult> UserRole(ManageUserRoleViewModel model)
         {
@@ -59,6 +65,7 @@ namespace UserManagement.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Policy = RolesPolicy.View)]
         [HttpGet]
         public async Task<ActionResult> AddRole()
         {
@@ -66,15 +73,72 @@ namespace UserManagement.Controllers
             return View(roles);
         }
 
+        [Authorize(Policy = RolesPolicy.Create)]
         [HttpPost]
         public async Task<ActionResult> AddRole(string roleName, List<RoleClaimViewModel> permissions)
         {
-            if (roleName != null)
+            if (roleName is null)
             {
-                await _roleManager.CreateAsync(new IdentityRole(roleName.Trim()));
+                TempData["Message"] = "Can't Add Empty Role";
+                return RedirectToAction(nameof(AddRole));
             }
-            return RedirectToAction(nameof(Index));
+            await _roleManager.CreateAsync(new IdentityRole(roleName.Trim()));
+            return RedirectToAction(nameof(AddRole));
         }
+
+        [Authorize(Policy = RolesPolicy.Edit)]
+        [HttpGet]
+        public async Task<IActionResult> EditRole(string roleId)
+        {
+            var role = await _userManagerService.GetRoleByRoleId(roleId);
+
+            if (role is null)
+            {
+                TempData["Message"] = "Can't Edit Role";
+                return RedirectToAction("AddRole");
+            }
+            return View(role);
+        }
+
+        [Authorize(Policy = RolesPolicy.Edit)]
+        [HttpPost]
+        public async Task<IActionResult> EditRole(string roleId,IdentityRole model)
+        {
+            var role = await _userManagerService.GetRoleByRoleId(roleId);
+
+            if (role is null)
+            {
+                TempData["Message"] = "Can't Edit Role";
+                return RedirectToAction(nameof(AddRole));
+            }
+
+            role.Name = model.Name;
+            await _roleManager.UpdateAsync(role);
+            return RedirectToAction(nameof(AddRole));
+        }
+
+        [Authorize(Policy = RolesPolicy.Delete)]
+        [HttpGet]
+        public async Task<IActionResult> DeleteRole(string roleId)
+        {
+            var role = await _userManagerService.GetRoleByRoleId(roleId);
+
+            if (role is null)
+            {
+                TempData["Message"] = "Can't Delete Role";
+                return RedirectToAction("AddRole");
+            }
+
+            if (_userManagerService.IsRoleInUse(role.Name).Result == true)
+            {
+                TempData["Message"] = "Can't Delete Used Role ";
+                return RedirectToAction("AddRole");
+            }
+
+            await _roleManager.DeleteAsync(role);
+            return RedirectToAction("AddRole");
+        }
+
 
         [HttpGet]
         public async Task<ActionResult> Permission(string roleId)
@@ -99,58 +163,34 @@ namespace UserManagement.Controllers
             return RedirectToAction("Index", new { roleId = model.RoleId });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(string userId)
+        [Authorize(Policy = UserPolicy.Create)]
+        public IActionResult CreateUser()
         {
-            return View(await _userManagerService.GetUserById(userId));
-        }
-        [HttpPost]
-        public async Task<IActionResult> Edit(string UserId, ApplicationUser model)
-        {
-            var user = await _userManager.FindByIdAsync(UserId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            user.FullName = model.FullName;
-            user.PhoneNumber = model.PhoneNumber;
-            await _userManager.UpdateAsync(user);
-            return RedirectToAction("Index");
-        }
-
-        public async Task<IActionResult> Delete(string UserId)
-        {
-            var user = await _userManagerService.GetUserById(UserId);
-            if(user == null)
-            {
-                return BadRequest();
-            }
-            await _userManager.DeleteAsync(user);
-            return RedirectToAction("Index");
-        }
-
-        public IActionResult Create()
-        {
+            ViewData["Roles"] = new SelectList(_roleManager.Roles, "Id", "Name");
             return View();
         }
 
+        [Authorize(Policy = UserPolicy.Create)]
         [HttpPost]
-        public async Task<IActionResult> Create(ApplicationUser user, string? MakkeSuper)
+        public async Task<IActionResult> CreateUser(ApplicationUser user, string roleId, IFormFile file)
         {
+
             if (ModelState.IsValid)
             {
+                user.ProfilePicture = await _userManagerService.SaveUserImage(file); ;
                 user.Id = Guid.NewGuid().ToString();
                 user.UserName = user.Email;
-                //await _userStore.SetUserNameAsync(user, user.Email, CancellationToken.None);
+
                 IdentityResult result = await _userManager.CreateAsync(user, user.PasswordHash);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, Roles.Custmer.ToString());
-                    if (MakkeSuper == "on")
+                    var role = await _userManagerService.GetRoleByRoleId(roleId);
+                    if (role is null)
                     {
-                        await _userManager.AddToRoleAsync(user, Roles.SuperAdmin.ToString());
+                        TempData["Message"] = "Role Not Valid";
+                        return View();
                     }
+                    await _userManager.AddToRoleAsync(user, role.Name);
                 }
                 else
                 {
@@ -162,6 +202,71 @@ namespace UserManagement.Controllers
             return View();
         }
 
+        [Authorize(Policy = UserPolicy.Edit)]
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string userId)
+        {
+            return View(await _userManagerService.GetUserById(userId));
+        }
+
+        [Authorize(Policy = UserPolicy.Edit)]
+        [HttpPost]
+        public async Task<IActionResult> EditUser(string UserId, ApplicationUser model, IFormFile file)
+        {
+            var user = await _userManagerService.GetUserById(UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if(file is not null)
+            {
+                user.ProfilePicture = await _userManagerService.SaveUserImage(file);
+            }
+            
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.PhoneNumber = model.PhoneNumber;
+            await _userManager.UpdateAsync(user);
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Policy = UserPolicy.Delete)]
+        public async Task<IActionResult> DeleteUser(string UserId)
+        {
+            var user = await _userManagerService.GetUserById(UserId);
+            if(user == null)
+            {
+                return BadRequest();
+            }
+            await _userManager.DeleteAsync(user);
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Policy = UserPolicy.View)]
+        public async Task<IActionResult> DetailsUser(string UserId)
+        {
+            var role = _userManagerService.GetUserRoleByUserId(UserId).Result.UserRoles;
+
+            List<string> strings = new List<string>();
+            foreach (var item in role)
+            {
+                if(item.Selected == true)
+                {
+                    strings.Add(item.RoleName);
+                }
+            }
+
+            ViewData["Roles"] = strings;
+            var user = await _userManagerService.GetUserById(UserId);
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            return View(user);
+        }
+
+        
         public async Task<IActionResult> ResetPassword(string UserId)
         {
             var user = await _userManagerService.GetUserById(UserId);

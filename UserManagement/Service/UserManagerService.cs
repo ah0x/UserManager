@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Helper;
@@ -23,8 +24,12 @@ namespace UserManagement.Service
         {
             var model = new PermissionViewModel();
             var allPermissions = new List<RoleClaimViewModel>();
+
             allPermissions.GetPermission(typeof(Permissions.Products), roleId);
             allPermissions.GetPermission(typeof(Permissions.Dashboard), roleId);
+            allPermissions.GetPermission(typeof(Permissions.RolesPolicy), roleId);
+            allPermissions.GetPermission(typeof(Permissions.UserPolicy), roleId);
+
             var role = await _roleManager.FindByIdAsync(roleId);
             model.RoleId = roleId;
             var claims = await _roleManager.GetClaimsAsync(role);
@@ -46,7 +51,9 @@ namespace UserManagement.Service
         {
             var users = await _userManager.Users.Select(c => new ApplicationUser()
             {
-                FullName = c.FullName,
+                
+                FirstName = c.FirstName,
+                LastName = c.LastName,
                 Email = c.Email,
                 CreatedDate = c.CreatedDate,
                 EmailConfirmed = c.EmailConfirmed,
@@ -98,6 +105,64 @@ namespace UserManagement.Service
                 return null;
             }
             return await _userManager.FindByIdAsync(userId);
+        }
+
+        public async Task<IdentityRole> GetRoleByRoleId(string roleId)
+        {
+            if (roleId == null)
+            {
+                return null;
+            }
+            var role = await _roleManager.Roles.Where(x => x.Id == roleId).FirstOrDefaultAsync();
+            if (role == null)
+            {
+                return null;
+            }
+            if (role.Name == "SuperAdmin" || role.Name == "Agent" || role.Name == "Custmer")
+            {
+                return null;
+            }
+            return role;
+        }
+
+        public async Task<bool> IsRoleInUse(string roleName)
+        {
+            if (roleName == null)
+            {
+                return false;
+            }
+
+            var users = await _userManager.Users.ToListAsync();
+            foreach(var user in users)
+            {
+                if (_userManager.IsInRoleAsync(user, roleName).Result == true)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public async Task<string> SaveUserImage(IFormFile file)
+        {
+            if (file != null)
+            {
+                string imgext = Path.GetExtension(file.FileName);
+                if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
+                {
+                    if (file.Length > 0)
+                    {
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Images\", file.FileName);
+
+                        using (var stream = System.IO.File.Create(filePath))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        return Path.Combine("/Images/" + file.FileName);
+                    }
+                }
+            }
+            return "/Images/DeffultUser";
         }
     }
 }

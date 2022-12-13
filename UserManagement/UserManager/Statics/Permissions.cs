@@ -12,10 +12,10 @@
 
         public static class Products
         {
-            public const string View = "Permissions.Product.View";
-            public const string Delete = "Permissions.Product.Delete";
-            public const string Edit = "Permissions.Product.Edit";
-            public const string Create = "Permissions.Product.Create";
+            public const string View = "Permissions.Products.View";
+            public const string Delete = "Permissions.Products.Delete";
+            public const string Edit = "Permissions.Products.Edit";
+            public const string Create = "Permissions.Products.Create";
         }
 
         public static class Dashboard
@@ -24,6 +24,22 @@
             public const string Delete = "Permissions.Dashboard.Delete";
             public const string Edit = "Permissions.Dashboard.Edit";
             public const string Create = "Permissions.Dashboard.Create";
+        }
+
+        public static class RolesPolicy
+        {
+            public const string View = "Permissions.RolesPolicy.View";
+            public const string Delete = "Permissions.RolesPolicy.Delete";
+            public const string Edit = "Permissions.RolesPolicy.Edit";
+            public const string Create = "Permissions.RolesPolicy.Create";
+        }
+
+        public static class UserPolicy
+        {
+            public const string View = "Permissions.UserPolicy.View";
+            public const string Delete = "Permissions.UserPolicy.Delete";
+            public const string Edit = "Permissions.UserPolicy.Edit";
+            public const string Create = "Permissions.UserPolicy.Create";
         }
 
         public static class Receipts

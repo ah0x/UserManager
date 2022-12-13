@@ -1,0 +1,72 @@
+﻿@model UserManagement.UserManager.AuthModels.ApplicationUser
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<br /><br /><br />
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+             <div class="form-floating">
+                <input asp-for="@Model.Email" class="form-control" disabled/>
+                <label style="color:black" asp-for="@Model.Email"></label>
+                <span asp-validation-for="@Model.Email" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-floating">
+                <input asp-for="@Model.FirstName" class="form-control" disabled/>
+                <label style="color:black" asp-for="@Model.FirstName"></label>
+                <span asp-validation-for="@Model.FirstName" class="text-danger"></span>
+            </div>
+            <br />
+             <div class="form-floating">
+                <input asp-for="@Model.LastName" class="form-control" disabled/>
+                <label style="color:black" asp-for="@Model.LastName"></label>
+                <span asp-validation-for="@Model.LastName" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-floating">
+                <input asp-for="@Model.PhoneNumber" class="form-control" disabled/>
+                <label style="color:black" asp-for="@Model.PhoneNumber" class="form-label"></label>
+                <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
+            </div>
+            <br />
+             <div class="form-floating">
+                <input asp-for="@Model.CreatedDate" class="form-control" disabled/>
+                <label style="color:black" asp-for="@Model.CreatedDate" class="form-label"></label>
+                <span asp-validation-for="@Model.CreatedDate" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label style="color:black" class="form-label">@Model.FirstName @Model.LastName Roles : </label>
+                @foreach (var item in @ViewBag.Roles)
+                {
+                    <ul>
+                      <li>@item</li>
+                    </ul>
+                }
+            </div>
+        </div>
+        <div class="col-6">
+            <div>
+                <img id="imgViewer" style="border:1px solid #000000; width:320px; height:320px; margin-left:175px;" src="@Model.ProfilePicture"/>
+            </div>
+        </div>
+       
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+        $(document).ready(function () {
+        });
+        $("#txtFile").change(function (event) {
+            var files = event.target.files;
+            $("#imgViewer").attr("src", window.URL.createObjectURL(files[0]));
+        });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

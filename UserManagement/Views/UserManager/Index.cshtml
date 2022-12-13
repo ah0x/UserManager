@@ -2,20 +2,23 @@
 
 @{
     ViewBag.Title = "All Users";
+    int count = 0;
 }
 
 <h1>All Users</h1>
 
- <a asp-action="Create" asp-controller="UserManager"
+ <a asp-action="CreateUser" asp-controller="UserManager"
        class="btn btn-primary mb-3" style="width:auto">
         Add new user
     </a>
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">Full Name</th>
+            <th>First Name</th>
+            <th>Last Name</th>
             <th>Email</th>
+            <th>Created Date</th>
             <th scope="col">Acctions</th>
         </tr>
     </thead>
@@ -24,17 +27,20 @@
         {
             if(user.Email != "Admin@Tm.Iq")
             {
+                count++;
                 <tr>
-                    <th scope="row">1</th>
-                    <td>@user.FullName</td>
+                    <th scope="row">@count</th>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
                     <td>@user.Email</td>
+                    <td>@user.CreatedDate</td>
                     <td>
                         <div class="input-group">
                             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" asp-controller="UserManager" asp-action="UserRole" asp-route-userId="@user.Id">Roles</a></li>
-                                <li><a class="dropdown-item" asp-controller="UserManager" asp-action="Edit" asp-route-userId="@user.Id">Edit</a></li>
-                                <li><a class="dropdown-item" asp-controller="UserManager" asp-action="Delete" asp-route-userId="@user.Id">Delete</a></li>
+                                <li><a class="dropdown-item" asp-controller="UserManager" asp-action="EditUser" asp-route-userId="@user.Id">Edit</a></li>
+                                <li><a class="dropdown-item" asp-controller="UserManager" asp-action="DeleteUser" asp-route-userId="@user.Id">Delete</a></li>
                                 <li><a class="dropdown-item" asp-controller="UserManager" asp-action="ResetPassword" asp-route-userId="@user.Id">Reset Password</a></li>
                                 @if(user.EmailConfirmed == true)
                                 {
@@ -44,6 +50,7 @@
                                 {
                                     <li><a class="dropdown-item" asp-controller="UserManager" asp-action="Look" asp-route-userId="@user.Id">UnLook</a></li>
                                 }
+                                <li><a class="dropdown-item" asp-controller="UserManager" asp-action="DetailsUser" asp-route-userId="@user.Id">Details</a></li>
                             </ul>
                         </div>
                     </td>

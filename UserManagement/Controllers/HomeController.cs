@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using UserManagement.Models;
+using static UserManagement.UserManager.Statics.Permissions;
 
 namespace UserManagement.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -13,6 +16,7 @@ namespace UserManagement.Controllers
             _logger = logger;
         }
 
+        [Authorize(Policy = Dashboard.View)]
         public IActionResult Index()
         {
             return View();

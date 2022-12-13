@@ -15,7 +15,7 @@ namespace UserManagement.Service
         {
             // Here you only need to change fromMail "Your Email" and fromPassword "Your Password"
             string fromMail = "ali.hamza@tm.iq";
-            string fromPassword = "********";
+            string fromPassword = "******";
 
             MailMessage message = new MailMessage();
             message.From = new MailAddress(fromMail);

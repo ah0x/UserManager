@@ -8,9 +8,20 @@ namespace UserManagement.UserManager.Seeds
     {
         public static async Task SeedAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Agent.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Custmer.ToString()));
+            if (await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString()) == null)
+            {
+                await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin.ToString()));
+            }
+
+            if (await roleManager.FindByNameAsync(Roles.Agent.ToString()) == null)
+            {
+                await roleManager.CreateAsync(new IdentityRole(Roles.Agent.ToString()));
+            }
+
+            if (await roleManager.FindByNameAsync(Roles.Custmer.ToString()) == null)
+            {
+                await roleManager.CreateAsync(new IdentityRole(Roles.Custmer.ToString()));
+            }
         }
     }
 }

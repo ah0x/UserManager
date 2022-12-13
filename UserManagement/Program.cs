@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
+using UserManagement.Helper;
 using UserManagement.Interfaces;
 using UserManagement.Service;
 using UserManagement.UserManager.AuthModels;
 using UserManagement.UserManager.Permission;
 using UserManagement.UserManager.Seeds;
+using static UserManagement.UserManager.Statics.Permissions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,20 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 //Role and Permission Configuration
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RolesPolicy.View", policy => policy.RequireClaim(  "Permission", RolesPolicy.View));
+    options.AddPolicy("RolesPolicy.Create", policy => policy.RequireClaim("Permission", RolesPolicy.Create));
+    options.AddPolicy("RolesPolicy.Edit", policy => policy.RequireClaim(  "Permission", RolesPolicy.Edit));
+    options.AddPolicy("RolesPolicy.Delete", policy => policy.RequireClaim("Permission", RolesPolicy.Delete));
+
+    options.AddPolicy("UserPolicy.View", policy => policy.RequireClaim("Permission", UserPolicy.View));
+    options.AddPolicy("UserPolicy.Create", policy => policy.RequireClaim("Permission", UserPolicy.Create));
+    options.AddPolicy("UserPolicy.Edit", policy => policy.RequireClaim("Permission", UserPolicy.Edit));
+    options.AddPolicy("UserPolicy.Delete", policy => policy.RequireClaim("Permission", UserPolicy.Delete));
+});
+
 
 builder.Services.AddScoped<IUserManagerService, UserManagerService>();
 
@@ -47,6 +63,7 @@ using (var scope = app.Services.CreateScope())
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
         await DefaultRoles.SeedAsync(userManager, roleManager);
+
         await DefaultUsers.SeedSuperAdminUsersAsync(userManager, roleManager);
 
         logger.LogInformation("Seeding Finished");
